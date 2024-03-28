@@ -13,70 +13,72 @@ const userSchema = new Schema(
         },
         username: {
             type: String,
-            unique: true,
-            lowecase: true,
             trim: true, 
-            index: true,
         },
         email: {
             type: String,
-            unique: true,
-            lowecase: true,
-            trim: true, 
+            trim: true,
+            default: null 
         },
         fullname: {
             type: String,
-            required: true,
             trim: true, 
-            index: true,
+            default: null
         },
         lastname: {
             type: String,
-            required: true,
-            trim: true, 
-            index: true,
+            trim: true,
+            default: null 
         },
         status:{
             type: String,
             default: null,
-            enum: ["Active", "Inactive","Close","Open","Approvered","Unapprovered","Verifyed","Unverifyed"],
+            enum: ["Active", "Inactive","Close","Open","Approved","Disapproved","Verified","Unverified"],
             index: true
         },
         avatar: {
             type: String, // cloudinary url
+            default: null
         },
         address:{
             type: String,
             trim: true,
+            default: null
         },
         latitude:{
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         logitude:{
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         deviceId:{
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         deviceType:{
             type: String,
             trim: true,
-            enum: ["ios", "android"]
+            enum: ["ios", "android"],
+            default: null
         },
         password: {
             type: String,
-            required: [true, 'Password is required']
+            default: null
         },
         refreshToken: {
-            type: String
+            type: String,
+            default: null
         },
         role: {
             type: String,
             default: "User",
-            enum: ["Super_Admin", "Restaurant", "Delivery_Boy", "User"]
+            enum: ["Super_Admin", "Restaurant", "Delivery_Boy", "User"],
+            trim: true
         }
     },
     {
@@ -89,6 +91,13 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
+
+userSchema.post('save', function () {
+    if (!this.username) { // Check if username is not already set
+        this.username = this._id.toString(); // Set username to _id
+        this.save(); // Save the updated document to the database
+    }
+});
 
 userSchema.methods.isPasswordCorrect = async function(password){
     // console.log(password);
@@ -103,9 +112,6 @@ userSchema.methods.generateAccessToken = function(){
     return jwt.sign(
         {
             _id: this._id,
-            email: this.email,
-            username: this.username,
-            fullname: this.fullname
         },
         process.env.ACCESS_TOKEN_SECRET,
         {

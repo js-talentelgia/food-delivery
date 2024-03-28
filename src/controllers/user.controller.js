@@ -4,6 +4,9 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+
+// Store generated OTP and expiration time
+let otpData = {};
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId);
@@ -14,122 +17,122 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
         return {accessToken,refreshToken}
 
     } catch (error) {
-        return error
-        throw new ApiError(500, "Something went wrong while generating refresh token and access token");
+        console.log('---------generated Token error---------', error);
+        // return error
+        // throw new ApiError(500, "Something went wrong while generating refresh token and access token");
+        return res.status(500).json(
+            new ApiResponse(500,error, "Something went wrong while generating refresh token and access token",true)
+        )
     }
 }
-const registerUser = asyncHandler(async (req, res) => {
-    // get user details from frontend
-    // validation - not empty
-    // check if user already exists: username, email
-    // check for images, check for avatar
-    // upload them to cloudinary, avatar
-    // create user object - create entry in db
-    // remove password and refresh token field from response
-    // check for user creation
-    // return res
-    const { phone_no, password, deviceType, deviceId } = req.body
 
-    // console.log('"-----------------',req.body);
-    if ([phone_no, password, deviceType, deviceId].some((field) => field?.trim() === "")) {
-        return res.status(404).json(
-            new ApiResponse(400,null, "All fields are required", true)
+const sendOtp = asyncHandler(async (req, res) => {
+    try {
+    const { phone_no } = req.body
+    const OTP = await generateOtp();
+    // console.log(OTP);
+    const expirationTime = Date.now() + 60000; // 1 minute expiration time
+    otpData[phone_no] = {
+        OTP,
+        expirationTime,
+    };
+    const data = {OTP: `${OTP}`}
+    return res.status(200).json(
+        new ApiResponse(200,data, "OTP sent successfully")
+    )
+    } catch (error) {
+        console.log('---------send otp error: ', error);
+        return res.status(400).json(
+            new ApiResponse(400,error, "Something went wrong!",true)
+        )
+    }
+})
+const registerUser = asyncHandler(async (req, res) => {
+    try {
+        const { phone_no, deviceType, deviceId, otp, role } = req.body
+        const storedOTPData = otpData[phone_no];
+        if (!storedOTPData || storedOTPData.expirationTime < Date.now()) {
+            return res.status(400).json(
+                new ApiResponse(400,null, "OTP has expired", true)
+            )
+        }    
+        if (storedOTPData.OTP != otp) {
+            return res.status(400).json(
+                new ApiResponse(400,null, "Invalid OTP", true)
+            )
+        }
+
+        const existedUser = await User.findOne({ phone_no: phone_no})
+        if (existedUser) {
+            delete otpData[phone_no];
+            return await loginUser(existedUser, res)
+        }
+
+        if ([phone_no, otp, role, deviceType, deviceId].some((field) => !field || field === "")) {
+            return res.status(400).json(
+                new ApiResponse(400, null, "All fields are required", true)
+            );
+        }
+        const deviceTypes = ["ios", "android"];
+        const checkDeviceType = deviceTypes.includes(deviceType); // is true
+        if(!checkDeviceType){
+            return res.status(404).json(
+                new ApiResponse(404,null, "Invalid device type", true)
+            )
+        }
+        const user = await User.create({
+            phone_no: phone_no,
+            deviceType: deviceType,
+            deviceId: deviceId,
+            role: role,
+            status: "Verified",
+
+        })
+        const createdUser = await User.findById(user._id).select("-password -refreshToken")
+        if (!createdUser) {
+            return res.status(500).json(
+                new ApiResponse(500, null, "Something went wrong while registering the user", true)
+            )
+        }
+        delete otpData[phone_no];
+        return await loginUser(user, res)
+    } catch (error) {
+        console.error("Error in registerUser:", error)
+        return res.status(400).json(
+            new ApiResponse(400,error, "Something went wrong!",true)
         )
     }
     
-    const deviceTypes = ["ios", "android"];
-    const checkDeviceType = deviceTypes.includes(deviceType); // is true
-    if(!checkDeviceType){
-        return res.status(404).json(
-            new ApiResponse(404,null, "Invalid device type", true)
-        )
-    }
-
-    const response = await setOtp();
-    console.log('------------------------',response);
-
-    return false
-
-    const existedUser = await User.findOne({
-        $or: [{ username }, { email }]
-    })
-    if (existedUser) {
-        throw new ApiError(409, "User with email or username already exists")
-    }
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path
-    }
-    if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required")
-    }
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
-    if (!avatar) {
-        throw new ApiError(400, "Avatar file is required")
-    }
-    const user = await User.create({
-        fullname,
-        avatar: avatar.url,
-        coverImage: coverImage?.url || "",
-        email,
-        password,
-        username: username.toLowerCase()
-    })
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )
-    if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering the user")
-    }
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User registered Successfully")
-    )
 })
-const loginUser = asyncHandler(async (req, res) => {
-    // get user details from frontend
-    // validation email and username
-    // find user
-    // password validate
-    // access token and refresh token
-    // return res
-    const { username, email, password } = req.body
-    if (!username && !email) {
-        throw new ApiError(400, "Username and email is required")
+const loginUser = async (req, res) => {
+
+    try {
+        const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(req._id);
+        const loggedInUser = await User.findById(req._id).select("-password -refreshToken");
+        if(!loggedInUser){
+            return res.status(404).json(new ApiResponse(404,null,"User not logged in"));
+        }
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        return res
+            .status(200)
+            .cookie('accessToken', accessToken, options)
+            .cookie('refreshToken', refreshToken, options)
+            .json(
+                new ApiResponse(
+                    200,
+                    { user: loggedInUser, accessToken, refreshToken },
+                    "User logged in successfully")
+            );
+    } catch (error) {
+         console.error("Error in loginUser:", error)
+         return res.status(400).json(
+             new ApiResponse(400,error, "Something went wrong!",true)
+         )
     }
-
-    const user = await User.findOne({
-        $or: [{ username }, { email }],
-    })
-
-    if (!user) {
-        throw new ApiError(401, "User does not exist")
-    }
-
-    const isPasswordCorrect = await user.isPasswordCorrect(password)
-
-    if (!isPasswordCorrect) {
-        throw new ApiError(401, "Invalid user Credentials")
-    }
-
-    const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(user._id);
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
-    return res
-        .status(200)
-        .cookie('accessToken', accessToken, options)
-        .cookie('refreshToken', refreshToken, options)
-        .json(
-            new ApiResponse(
-                200,
-                { user: loggedInUser, accessToken, refreshToken },
-                "User logged in successfully")
-        );
-})
+}
 
 const loggOutUser = asyncHandler(async (req, res) => {
     User.findByIdAndUpdate(req.user.id, {
@@ -213,7 +216,14 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    return res.status(200).json(200, req.user, "Current user fetched successfully")
+    // return res.status(200).json(201, req.user, "Current user fetched successfully")
+    return res
+                 .status(200)
+                 .json(new ApiResponse(
+                    200,
+                    req.user,
+                    "Current user fetched successfully"
+                 ))
 })
 const updateAccountDetails = asyncHandler(async (req, res) => {
         const {fullname, email} = req.body
@@ -278,18 +288,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, user, "Cover image updated successfully"))
 })
 
-const setOtp = async (req, res) => {
+const generateOtp = async (req, res) => {
     let otp = Math.floor(1000 + Math.random() * 9000);
-    sessionStorage.setItem("otpVerification", otp);
-    setTimeout(gameLost, 60000);
-    return otp;
-}
-
-const gameLost = () => {
-    let otp = sessionStorage.getItem("otpVerification");
-    console.log(otp);
+    return otp; 
 }
 
 
-export { registerUser, loginUser, loggOutUser, refreshAccessToken, changeCurrentPassword, 
+export { sendOtp, registerUser, loginUser, loggOutUser, refreshAccessToken, changeCurrentPassword, 
          getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage }

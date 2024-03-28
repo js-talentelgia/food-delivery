@@ -3,7 +3,9 @@ import {response} from "../utils/response.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerRoles = [
-    check('phone_no').notEmpty().withMessage('Phone number is required').isNumeric()
+    check('phone_no').notEmpty().withMessage('Phone number is required'),
+    check('phone_no').isNumeric().withMessage('Phone number must be number'),
+    check('phone_no').isLength({min: 10}).withMessage('Phone number must be 10 digits'),
 ]
 
 const registerValidate = async (req, res, next) => {
