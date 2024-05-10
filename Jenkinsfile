@@ -7,10 +7,9 @@ pipeline {
                 sh 'git status'
             }
         }
-
         stage('Build') {
             steps {
-                sh 'ls'
+                sh 'docker compose build . -t js-talentelgia/food-delivery-app:latest'
             }
         }
     }
