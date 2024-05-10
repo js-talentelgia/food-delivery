@@ -9,7 +9,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'docker compose build -t js-talentelgia/food-delivery-app:latest .'
+                sh 'docker build -t js-talentelgia/food-delivery-app:latest .'
             }
         }
     }
