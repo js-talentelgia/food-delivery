@@ -1,13 +1,13 @@
 pipeline {
     agent any
-    environment {     
+    environment {
+        CI = 'true'     
         DOCKERHUB_CREDENTIALS= credentials('jagseersingh')     
         DOCKER_IMAGE_NAME = 'jagseersingh/food-delivery-app:latest'
         SERVER_REMOTE_HOST = '3.144.240.118'
         SERVER_REMOTE_USER = 'ubuntu'
         SSH_KEY = credentials('food-delivery-app')
-    }
-    tools { nodejs "node_v18" }   
+    }  
     stages {
         stage('Checkout') {
             steps {
@@ -33,6 +33,7 @@ pipeline {
         }
         stage('Login to server') {
             steps {
+                tools { nodejs "node_v18" } 
                 script {
                     sh '''#!/bin/bash
                     sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST "\
