@@ -8,11 +8,6 @@ pipeline {
         SSH_KEY = credentials('food-delivery-app')
     }  
     stages {
-        stage('Checkout') {
-            steps {
-                sh 'git status'
-            }
-        }
         stage('Build the docker image') {
             steps {
                 sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
@@ -40,8 +35,7 @@ pipeline {
                             git clone https://github.com/js-talentelgia/food-delivery.git
                     else
                         # Pull the latest changes if the repository already exists
-                        cd food-delivery && git pull origin main && pwd && ls && 
-                        sudo npm install && docker compose down && docker compose up -d
+                        cd food-delivery && git pull origin main && docker compose down && docker compose up -d
                     fi"
                     '''
                 }
@@ -50,7 +44,7 @@ pipeline {
     }
     post{
         always {  
-            sh 'docker logout'           
+            sh 'docker logout'
         }      
     } 
 }
