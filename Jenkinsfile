@@ -30,29 +30,26 @@ pipeline {
                 echo 'Push Image Completed'       
             }           
         }
-        stage('Login to server') {         
-            steps{                            
-                sh '''#!/bin/bash
-                     sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST
-                     '''
-                    
-            }           
-        }
-        stage('Clone or Pull Git Repository') {
+        stage('Login to server') {
             steps {
                 script {
-                    // Check if the repository already exists in the workspace
-                    if (fileExists('food-delivery')) {
-                        // Pull the latest changes if the repository already exists
-                        sh "cd food-delivery && git pull origin main"
-                    } else {
-                        // Clone the repository if it doesn't exist in the workspace
-                        sh "git clone https://github.com/js-talentelgia/food-delivery.git food-delivery"
-                        sh "ls"
-                    }
+                    sh '''
+                        #!/bin/bash
+                        # Log in to the server using SSH
+                        sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST
+
+                        # Check if the repository already exists in the workspace
+                        if [ ! -d "food-delivery" ]; then
+                            # Clone the repository if it doesn't exist
+                            git clone your_git_repository_url food-delivery
+                        else
+                            # Pull the latest changes if the repository already exists
+                            cd food-delivery && git pull origin main
+                        fi
+                    '''
                 }
             }
-        }    
+        }
     }
     post{
         always {  
