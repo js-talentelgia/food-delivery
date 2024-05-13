@@ -33,19 +33,15 @@ pipeline {
         stage('Login to server') {
             steps {
                 script {
-                    sh '''
-                        #!/bin/bash
-                        # Log in to the server using SSH
-                        sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST
-
-                        # Check if the repository already exists in the workspace
-                        if [ ! -d "food-delivery" ]; then
+                    sh '''#!/bin/bash
+                    sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST "\
+                    if [ ! -d "food-delivery" ]; then
                             # Clone the repository if it doesn't exist
                             git clone https://github.com/js-talentelgia/food-delivery.git
-                        else
-                            # Pull the latest changes if the repository already exists
-                            cd food-delivery && git pull origin main
-                        fi
+                    else
+                        # Pull the latest changes if the repository already exists
+                        cd food-delivery && git pull origin main
+                    fi"
                     '''
                 }
             }
