@@ -6,7 +6,8 @@ pipeline {
         SERVER_REMOTE_HOST = '3.144.240.118'
         SERVER_REMOTE_USER = 'ubuntu'
         SSH_KEY = credentials('food-delivery-app')
-    }   
+    }
+    tools { nodejs "nodejs" }   
     stages {
         stage('Checkout') {
             steps {
