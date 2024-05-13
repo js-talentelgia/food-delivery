@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
         const storedOTPData = otpData[phone_no];
         if (!storedOTPData || storedOTPData.expirationTime < Date.now()) {
             return res.status(400).json(
-                new ApiResponse(400,null, "OTP has expired", true)
+                new ApiResponse(400,null, "OTP has expired!!", true)
             )
         }    
         if (storedOTPData.OTP != otp) {
