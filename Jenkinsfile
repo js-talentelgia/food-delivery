@@ -1,7 +1,6 @@
 pipeline {
     agent any
     environment {
-        CI = 'true'     
         DOCKERHUB_CREDENTIALS= credentials('jagseersingh')     
         DOCKER_IMAGE_NAME = 'jagseersingh/food-delivery-app:latest'
         SERVER_REMOTE_HOST = '3.144.240.118'
@@ -31,8 +30,7 @@ pipeline {
                 echo 'Push Image Completed'       
             }           
         }
-        stage('Login to server') {
-            tools { nodejs "node_v18" } 
+        stage('Build app') {
             steps {
                 script {
                     sh '''#!/bin/bash
@@ -42,7 +40,8 @@ pipeline {
                             git clone https://github.com/js-talentelgia/food-delivery.git
                     else
                         # Pull the latest changes if the repository already exists
-                        cd food-delivery && git pull origin main && pwd && ls && sudo npm install && docker compose down && docker compose up
+                        cd food-delivery && git pull origin main && pwd && ls && 
+                        sudo npm install && docker compose down && docker compose up -d
                     fi"
                     '''
                 }
