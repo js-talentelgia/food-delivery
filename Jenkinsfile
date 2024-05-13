@@ -33,7 +33,7 @@ pipeline {
         stage('Login to server') {         
             steps{                            
                 sh '''#!/bin/bash
-                     ssh -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST "\
+                     ssh -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST
                      '''
                     
             }           
