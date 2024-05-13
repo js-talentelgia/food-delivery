@@ -40,7 +40,8 @@ pipeline {
                             git clone https://github.com/js-talentelgia/food-delivery.git
                     else
                         # Pull the latest changes if the repository already exists
-                        cd food-delivery && git pull origin main
+                        cd food-delivery && git pull origin main &&
+                        npm install && docker compose up -d
                     fi"
                     '''
                 }

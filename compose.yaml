@@ -9,8 +9,8 @@
 # https://github.com/docker/awesome-compose
 services:
   server:
+    image: jagseersingh/food-delivery-app:latest
     build:
-      context: .
       target: prod
     environment:
       NODE_ENV: production
