@@ -37,6 +37,21 @@ pipeline {
                      '''
                     
             }           
+        }
+        stage('Clone or Pull Git Repository') {
+            steps {
+                script {
+                    // Check if the repository already exists in the workspace
+                    if (fileExists('food-delivery')) {
+                        // Pull the latest changes if the repository already exists
+                        sh "cd food-delivery && git pull origin main"
+                    } else {
+                        // Clone the repository if it doesn't exist in the workspace
+                        sh "git clone https://github.com/js-talentelgia/food-delivery.git food-delivery"
+                        sh "ls"
+                    }
+                }
+            }
         }    
     }
     post{
