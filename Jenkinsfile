@@ -42,7 +42,7 @@ pipeline {
                             git clone https://github.com/js-talentelgia/food-delivery.git
                     else
                         # Pull the latest changes if the repository already exists
-                        cd food-delivery && git pull origin main && pwd && ls && sudo npm install && docker compose restart -t 30 food-delivery
+                        cd food-delivery && git pull origin main && pwd && ls && sudo npm install && docker compose down && docker compose up
                     fi"
                     '''
                 }
