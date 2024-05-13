@@ -41,7 +41,7 @@ pipeline {
                         # Check if the repository already exists in the workspace
                         if [ ! -d "food-delivery" ]; then
                             # Clone the repository if it doesn't exist
-                            git clone your_git_repository_url food-delivery
+                            git clone https://github.com/js-talentelgia/food-delivery.git
                         else
                             # Pull the latest changes if the repository already exists
                             cd food-delivery && git pull origin main
