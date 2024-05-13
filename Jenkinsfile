@@ -3,6 +3,9 @@ pipeline {
     environment {     
         DOCKERHUB_CREDENTIALS= credentials('jagseersingh')     
         DOCKER_IMAGE_NAME = 'jagseersingh/food-delivery-app:latest'
+        SERVER_REMOTE_HOST = '3.144.240.118'
+        SERVER_REMOTE_USER = 'ubuntu'
+        SSH_KEY = credentials('food-delivery-app')
     }   
     stages {
         stage('Checkout') {
@@ -10,7 +13,7 @@ pipeline {
                 sh 'git status'
             }
         }
-        stage('Build') {
+        stage('Build the docker image') {
             steps {
                 sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
             }
@@ -25,6 +28,14 @@ pipeline {
             steps{                            
                 sh 'sudo docker push ${DOCKER_IMAGE_NAME}'                 
                 echo 'Push Image Completed'       
+            }           
+        }
+        stage('Login to server') {         
+            steps{                            
+                sh '''#!/bin/bash
+                    ssh -i "$SSH_KEY $SERVER_REMOTE_USER@SERVER_REMOTE_HOST"\
+                    pwd
+                    '''
             }           
         }    
     }
