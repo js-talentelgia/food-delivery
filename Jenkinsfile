@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {     
         DOCKERHUB_CREDENTIALS= credentials('jagseersingh')     
-        DOCKER_IMAGE_NAME = 'js-talentelgia/food-delivery-app:latest'
+        DOCKER_IMAGE_NAME = 'jagseersingh/food-delivery-app:latest'
     }   
     stages {
         stage('Checkout') {
@@ -17,9 +17,14 @@ pipeline {
         }
         stage('Login to Docker Hub') {         
             steps{                            
-                sh '''echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                      sudo docker push ${DOCKER_IMAGE_NAME}'''                 
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
                 echo 'Login Completed'                
+            }           
+        }
+        stage('Push Image to Docker Hub') {         
+            steps{                            
+                sh 'sudo docker push ${DOCKER_IMAGE_NAME}'                 
+                echo 'Push Image Completed'       
             }           
         }    
     }
