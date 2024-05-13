@@ -10,6 +10,7 @@
 services:
   server:
     image: jagseersingh/food-delivery-app:latest
+    container_name: food-delivery
     build:
       target: prod
     environment:
