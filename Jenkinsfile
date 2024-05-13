@@ -32,8 +32,8 @@ pipeline {
             }           
         }
         stage('Login to server') {
+            tools { nodejs "node_v18" } 
             steps {
-                tools { nodejs "node_v18" } 
                 script {
                     sh '''#!/bin/bash
                     sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST "\
