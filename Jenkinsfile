@@ -45,6 +45,7 @@ pipeline {
     post{
         always {  
             sh 'docker logout'
+            slackSend message: 'Hello jenkins'
         }      
     } 
 }
