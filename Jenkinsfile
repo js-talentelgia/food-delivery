@@ -45,15 +45,16 @@ pipeline {
     post{
         // only triggered when blue or green sign..
         success {
-            slackSend color: 'good', message: "Build success: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
+            slackSend color: 'good', message: "Build SUCCESS: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
         }
         // triggered when red sign..
         failure {
-            slackSend color: 'danger', message: "Build failed: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
+            slackSend color: 'danger', message: "Build FAILURE: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
         }
         // trigger every-works..
         always {
             sh 'docker logout'
+            slackSend color: 'danger', message: "Build ${currentBuild.currentResult}: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
         }      
     } 
 }
