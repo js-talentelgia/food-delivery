@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Build the docker image') {
             steps {
-                sh 'DOCKER_BUILDKIT=1 docker buildx build -t ${DOCKER_IMAGE_NAME} .'
+                sh 'docker build -t ${DOCKER_IMAGE_NAME} .'
             }
         }
         stage('Login to Docker Hub') {         
