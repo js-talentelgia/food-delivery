@@ -54,6 +54,7 @@ pipeline {
         // trigger every-works..
         always {
             sh 'docker logout'
+            slackSend color: 'danger', message: "Build ${currentBuild.currentResult}: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
         }      
     } 
 }
