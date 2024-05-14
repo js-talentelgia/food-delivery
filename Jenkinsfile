@@ -16,13 +16,13 @@ pipeline {
         }
         stage('Login to Docker Hub') {         
             steps{                            
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
                 echo 'Login Completed'                
             }           
         }
         stage('Push Image to Docker Hub') {         
             steps{                            
-                sh 'sudo docker push ${DOCKER_IMAGE_NAME}'                 
+                sh 'docker push ${DOCKER_IMAGE_NAME}'                 
                 echo 'Push Image Completed'       
             }           
         }
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     sh '''#!/bin/bash
-                    sudo ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST "\
+                    ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" $SERVER_REMOTE_USER@$SERVER_REMOTE_HOST "\
                     if [ ! -d "food-delivery" ]; then
                             # Clone the repository if it doesn't exist
                             git clone https://github.com/js-talentelgia/food-delivery.git
