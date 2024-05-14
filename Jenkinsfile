@@ -6,6 +6,7 @@ pipeline {
         SERVER_REMOTE_HOST = '3.144.240.118'
         SERVER_REMOTE_USER = 'ubuntu'
         SSH_KEY = credentials('food-delivery-app')
+        DOCKER_BUILDKIT = '1'
     }  
     stages {
         stage('Build the docker image') {
