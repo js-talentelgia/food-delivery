@@ -4,6 +4,11 @@ import {app} from './app.js'
 dotenv.config({
     path: './.env'
 })
+app.get('/',(req,res) => {
+    res.status(200).json({
+        message: "Welcome to this site!"
+    })
+}) 
 connectDB()
 .then(() => {
     app.listen(process.env.PORT || 8000, () => {
