@@ -43,15 +43,15 @@ pipeline {
         }
     }
     post{
-        // only triggered when blue or green sign..
+        // only triggered when blue or green sign
         success {
             slackSend color: 'good', message: "Build SUCCESS: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
         }
-        // triggered when red sign..
+        // triggered when red sign
         failure {
             slackSend color: 'danger', message: "Build FAILURE: ${currentBuild.fullDisplayName} [${env.BUILD_NUMBER}] (<${env.BUILD_URL}|Open>)"
         }
-        // trigger every-works..
+        // trigger every-works
         always {
             sh 'docker logout'
         }      
