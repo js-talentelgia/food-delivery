@@ -9,13 +9,12 @@
 # https://github.com/docker/awesome-compose
 services:
   server:
-    image: jagseersingh/food-delivery-app/staging:latest
+    image: jagseersingh/food-delivery-app:latest
     container_name: food-delivery
     build:
-      context: .
-      target: staging
+      target: prod
     environment:
-      NODE_ENV: staging
+      NODE_ENV: production
     ports:
       - 3000:3000
       - 9229:9229
