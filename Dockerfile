@@ -18,6 +18,16 @@ COPY . .
 # Run the application.
 CMD ["npm", "run", "dev"]
 
+FROM base as staging
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
+USER node
+COPY . .
+# Run the application.
+CMD node -r dotenv/config src/index.js
+
 FROM base as prod
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=package-lock.json,target=package-lock.json \
