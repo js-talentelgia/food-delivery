@@ -20,9 +20,11 @@ pipeline {
                     if [ ! -d "food-delivery" ]; then
                             # Clone the repository if it doesn't exist
                             git clone https://github.com/js-talentelgia/food-delivery.git
+                            
+                            cd food-delivery && git checkout staging && git pull origin staging && docker compose -f compose.staging.yaml down && docker compose -f compose.staging.yaml up -d
                     else
                         # Pull the latest changes if the repository already exists
-                        cd food-delivery && git pull origin staging && docker compose -f compose.staging.yaml down && docker compose -f compose.staging.yaml up -d
+                        cd food-delivery && git checkout staging && git pull origin staging && docker compose -f compose.staging.yaml down && docker compose -f compose.staging.yaml up -d
                     fi"
                     '''
                 }
