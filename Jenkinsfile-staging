@@ -1,9 +1,8 @@
 pipeline {
     agent any
     environment {
-        DOCKERHUB_CREDENTIALS= credentials('jagseersingh')     
-        DOCKER_IMAGE_NAME = 'jagseersingh/food-delivery-app:latest'
-        SERVER_REMOTE_HOST = '3.144.240.118'
+        DOCKER_IMAGE_NAME = 'jagseersingh/food-delivery-app/staging:latest'
+        SERVER_REMOTE_HOST = '18.117.225.181'
         SERVER_REMOTE_USER = 'ubuntu'
         SSH_KEY = credentials('food-delivery-app')
     }  
@@ -23,7 +22,7 @@ pipeline {
                             git clone https://github.com/js-talentelgia/food-delivery.git
                     else
                         # Pull the latest changes if the repository already exists
-                        cd food-delivery && git pull origin main && docker compose -f compose.staging.yaml down && docker compose -f compose.staging.yaml up -d
+                        cd food-delivery && git pull origin staging && docker compose -f compose.staging.yaml down && docker compose -f compose.staging.yaml up -d
                     fi"
                     '''
                 }
